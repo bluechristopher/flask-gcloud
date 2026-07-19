@@ -115,6 +115,14 @@ echo -e "\n${CYAN}Submitting manual build and deploy to Cloud Build...${NC}"
 gcloud builds submit --config=cloudbuild.yaml \
     --substitutions="_LOCATION=${REGION},_REPO_NAME=${REPO_NAME},_SERVICE_NAME=${SERVICE_NAME},_BUCKET_NAME=${BUCKET_NAME}"
 
+# Explicitly set the Cloud Run service to allow public access
+echo -e "\n${CYAN}Setting Cloud Run service to allow public access...${NC}"
+gcloud run services add-iam-policy-binding "$SERVICE_NAME" \
+    --region="$REGION" \
+    --member="allUsers" \
+    --role="roles/run.invoker" \
+    --quiet
+
 # Fetch service URL
 SERVICE_URL=$(gcloud run services describe "$SERVICE_NAME" --region="$REGION" --format="value(status.url)")
 
