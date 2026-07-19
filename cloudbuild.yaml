@@ -40,3 +40,7 @@ substitutions:
 
 images:
   - '${_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/${_SERVICE_NAME}:${_TAG}'
+
+# Directs logs strictly to Cloud Logging, resolving the service account constraint
+options:
+  logging: CLOUD_LOGGING_ONLY
