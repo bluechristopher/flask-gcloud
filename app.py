@@ -78,7 +78,7 @@ def init_local_db():
     except Exception as e:
         app.logger.error(f"Error initializing local database: {e}")
 
-# Initialize DB on startup
+# Initialise DB on startup
 if BUCKET_NAME:
     download_db()
 else:
@@ -99,17 +99,33 @@ def index():
         cursor = conn.cursor()
         cursor.execute("SELECT id, name, message, created_at FROM Greeting ORDER BY id DESC")
         rows = cursor.fetchall()
+        
         for r in rows:
+            # Parse and format the date string beautifully
+            formatted_date = r['created_at']
+            if formatted_date:
+                try:
+                    # Assumes standard YYYY-MM-DD HH:MM:SS format from SQLite
+                    dt_obj = datetime.strptime(formatted_date, '%Y-%m-%d %H:%M:%S')
+                    formatted_date = dt_obj.strftime('%d %B %Y, %I:%M %p').lower()
+                    
+                    # Strip leading zero from the day if present (e.g., '09 July' -> '9 July')
+                    if formatted_date.startswith('0'):
+                        formatted_date = formatted_date[1:]
+                except ValueError:
+                    # Fallback in case the database format varies slightly
+                    pass
+
             greetings.append({
                 'id': r['id'],
                 'name': r['name'],
                 'message': r['message'],
-                'created_at': r['created_at']
+                'created_at': formatted_date
             })
         conn.close()
     except Exception as e:
         app.logger.error(f"Failed to fetch greetings: {e}")
-        flash(f"Error loading greetings from database.", "error")
+        flash("Error loading greetings from database.", "error")
         
     return render_template('index.html', greetings=greetings)
 
@@ -141,7 +157,7 @@ def add_greeting():
         count = cursor.fetchone()[0]
         
         if count >= 200:
-            flash("Greeting limit reached (maximum 200 entries). Cannot add more greetings.", "error")
+            flash("Greeting limit reached. Cannot add more greetings.", "error")
             conn.close()
             return redirect(url_for('index'))
             
