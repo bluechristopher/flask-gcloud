@@ -19,6 +19,7 @@ echo -e ""
 
 # Detect current project ID
 DEFAULT_PROJECT_ID=$(gcloud config get-value project 2>/dev/null || echo "")
+DEFAULT_PROJECT_ID=${DEFAULT_PROJECT_ID:-"flask-gcloud-502908"}
 
 echo -e "Press [Enter] to use defaults shown in brackets."
 echo -e ""
@@ -48,7 +49,7 @@ read -p "Enter GCP Region [$DEFAULT_REGION]: " REGION
 REGION=${REGION:-$DEFAULT_REGION}
 
 # 3. Prompt for Bucket Name
-DEFAULT_BUCKET="greetings-db-${PROJECT_ID}"
+DEFAULT_BUCKET="db-flask-502908"
 read -p "Enter GCS Bucket Name for SQLite DB [$DEFAULT_BUCKET]: " BUCKET_NAME
 BUCKET_NAME=${BUCKET_NAME:-$DEFAULT_BUCKET}
 
