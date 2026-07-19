@@ -117,6 +117,7 @@ def index():
                     pass
 
             greetings.append({
+                'id': r['id'],
                 'name': r['name'],
                 'message': r['message'],
                 'created_at': formatted_date
