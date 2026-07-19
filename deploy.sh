@@ -13,23 +13,23 @@ echo -e "${CYAN}${BOLD}====================================================${NC}
 echo -e "${CYAN}${BOLD}     Flask GCloud App Deployment Script             ${NC}"
 echo -e "${CYAN}${BOLD}====================================================${NC}"
 
-echo -e "${YELLOW}Fetching your active Google Cloud projects...${NC}"
-gcloud projects list --format="table(projectId,name)"
-echo -e ""
-
-# Detect current project ID
+# 1. Project Selection
 DEFAULT_PROJECT_ID=$(gcloud config get-value project 2>/dev/null || echo "")
-DEFAULT_PROJECT_ID=${DEFAULT_PROJECT_ID:-"flask-gcloud-502908"}
 
-echo -e "Press [Enter] to use defaults shown in brackets."
-echo -e ""
-
-# 1. Prompt for Project ID
 if [ -n "$DEFAULT_PROJECT_ID" ]; then
-    read -p "Enter the Google Cloud Project ID from the list above [$DEFAULT_PROJECT_ID]: " PROJECT_ID
-    PROJECT_ID=${PROJECT_ID:-$DEFAULT_PROJECT_ID}
-else
-    read -p "Enter the Google Cloud Project ID from the list above: " PROJECT_ID
+    echo -e "Detected active Google Cloud Project: ${GREEN}$DEFAULT_PROJECT_ID${NC}"
+    read -p "Use this project? (y/n) [y]: " USE_DEFAULT
+    USE_DEFAULT=${USE_DEFAULT:-"y"}
+    if [[ "$USE_DEFAULT" == "y" || "$USE_DEFAULT" == "Y" ]]; then
+        PROJECT_ID=$DEFAULT_PROJECT_ID
+    fi
+fi
+
+if [ -z "$PROJECT_ID" ]; then
+    echo -e "\n${YELLOW}Fetching your active Google Cloud projects...${NC}"
+    gcloud projects list --format="table(projectId,name)"
+    echo -e ""
+    read -p "Enter the Google Cloud Project ID from the list: " PROJECT_ID
     if [ -z "$PROJECT_ID" ]; then
         echo -e "${RED}Error: Project ID is required.${NC}"
         exit 1
@@ -48,9 +48,16 @@ DEFAULT_REGION="asia-southeast1"
 read -p "Enter GCP Region [$DEFAULT_REGION]: " REGION
 REGION=${REGION:-$DEFAULT_REGION}
 
-# 3. Prompt for Bucket Name
-DEFAULT_BUCKET="db-flask-502908"
-read -p "Enter GCS Bucket Name for SQLite DB [$DEFAULT_BUCKET]: " BUCKET_NAME
+# 3. GCS Bucket Selection
+echo -e "\nEnabling Cloud Storage API to fetch existing buckets..."
+gcloud services enable storage.googleapis.com --quiet
+
+echo -e "\n${YELLOW}Existing GCS buckets in project ${PROJECT_ID}:${NC}"
+gcloud storage buckets list --format="table(name,location)" 2>/dev/null || echo -e "(No existing buckets found or Storage API not initialized yet)"
+echo -e ""
+
+DEFAULT_BUCKET="db-flask-${PROJECT_ID}"
+read -p "Enter GCS Bucket Name to use [$DEFAULT_BUCKET]: " BUCKET_NAME
 BUCKET_NAME=${BUCKET_NAME:-$DEFAULT_BUCKET}
 
 # Define repository and service names
