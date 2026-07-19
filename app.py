@@ -107,7 +107,7 @@ def index():
                 try:
                     # Assumes standard YYYY-MM-DD HH:MM:SS format from SQLite
                     dt_obj = datetime.strptime(formatted_date, '%Y-%m-%d %H:%M:%S')
-                    formatted_date = dt_obj.strftime('%d %B %Y, %I:%M %p').lower()
+                    formatted_date = dt_obj.strftime('%d %B %Y, %I:%M %p')
                     
                     # Strip leading zero from the day if present (e.g., '09 July' -> '9 July')
                     if formatted_date.startswith('0'):
@@ -117,7 +117,6 @@ def index():
                     pass
 
             greetings.append({
-                'id': r['id'],
                 'name': r['name'],
                 'message': r['message'],
                 'created_at': formatted_date

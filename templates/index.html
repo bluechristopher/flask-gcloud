@@ -41,13 +41,12 @@
         {% if greetings %}
         <!-- Greetings Table -->
         <h2 style="margin-top: 1.5rem; margin-bottom: 1rem; align-self: flex-start; font-size: 1.5rem; font-weight: 600; color: #a5b4fc;">
-            Greetings Count: {{ greetings|length }}
+            Count: {{ greetings|length }}
         </h2>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 60px;">ID</th>
                         <th style="width: 150px;">Name</th>
                         <th>Message</th>
                         <th style="width: 180px;">Date & Time</th>
@@ -57,7 +56,6 @@
                 <tbody>
                     {% for g in greetings %}
                         <tr>
-                            <td>{{ g.id }}</td>
                             <td class="td-name">{{ g.name }}</td>
                             <td class="td-message">{{ g.message }}</td>
                             <td class="td-time">{{ g.created_at }}</td>
