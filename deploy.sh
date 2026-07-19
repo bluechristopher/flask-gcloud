@@ -13,6 +13,10 @@ echo -e "${CYAN}${BOLD}====================================================${NC}
 echo -e "${CYAN}${BOLD}     Flask GCloud App Deployment Script             ${NC}"
 echo -e "${CYAN}${BOLD}====================================================${NC}"
 
+echo -e "${YELLOW}Fetching your active Google Cloud projects...${NC}"
+gcloud projects list --format="table(projectId,name)"
+echo -e ""
+
 # Detect current project ID
 DEFAULT_PROJECT_ID=$(gcloud config get-value project 2>/dev/null || echo "")
 
@@ -21,10 +25,10 @@ echo -e ""
 
 # 1. Prompt for Project ID
 if [ -n "$DEFAULT_PROJECT_ID" ]; then
-    read -p "Enter your Google Cloud Project ID [$DEFAULT_PROJECT_ID]: " PROJECT_ID
+    read -p "Enter the Google Cloud Project ID from the list above [$DEFAULT_PROJECT_ID]: " PROJECT_ID
     PROJECT_ID=${PROJECT_ID:-$DEFAULT_PROJECT_ID}
 else
-    read -p "Enter your Google Cloud Project ID: " PROJECT_ID
+    read -p "Enter the Google Cloud Project ID from the list above: " PROJECT_ID
     if [ -z "$PROJECT_ID" ]; then
         echo -e "${RED}Error: Project ID is required.${NC}"
         exit 1
