@@ -52,11 +52,26 @@ REGION=${REGION:-$DEFAULT_REGION}
 echo -e "\nEnabling Cloud Storage API to fetch existing buckets..."
 gcloud services enable storage.googleapis.com --quiet
 
-echo -e "\n${YELLOW}Existing GCS buckets in project ${PROJECT_ID}:${NC}"
-gcloud storage buckets list --format="table(name,location)" 2>/dev/null || echo -e "(No existing buckets found or Storage API not initialized yet)"
+echo -e "\n${YELLOW}Checking existing GCS buckets in project ${PROJECT_ID}...${NC}"
+BUCKETS_LIST=$(gcloud storage buckets list --format="value(name)" 2>/dev/null | grep -v '^$' || echo "")
+BUCKET_COUNT=$(echo "$BUCKETS_LIST" | grep -c -v '^$' || echo 0)
+
+if [ "$BUCKET_COUNT" -eq 1 ]; then
+    DEFAULT_BUCKET=$(echo "$BUCKETS_LIST" | xargs)
+    echo -e "Found exactly one existing bucket: ${GREEN}$DEFAULT_BUCKET${NC}. Setting it as default."
+else
+    if [ "$BUCKET_COUNT" -gt 1 ]; then
+        echo -e "Found multiple buckets ($BUCKET_COUNT):"
+        echo "$BUCKETS_LIST" | sed 's/^/  - /'
+        echo -e "Will default to creating a new bucket."
+    else
+        echo -e "No existing buckets found. Will default to creating a new bucket."
+    fi
+    # Default to a new unique bucket name
+    DEFAULT_BUCKET="db-flask-${PROJECT_ID}"
+fi
 echo -e ""
 
-DEFAULT_BUCKET="db-flask-${PROJECT_ID}"
 read -p "Enter GCS Bucket Name to use [$DEFAULT_BUCKET]: " BUCKET_NAME
 BUCKET_NAME=${BUCKET_NAME:-$DEFAULT_BUCKET}
 
